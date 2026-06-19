@@ -31,8 +31,8 @@ from typing import Optional
 #  ⚙️  CONFIGURATION — edit these before first run
 # ══════════════════════════════════════════════════════════════════
 
-USERNAME = "***REMOVED***"      # lowercase letters, numbers, hyphens only
-TOKEN    = "my-secret-token-***REMOVED***"  # any string you choose — keep it private
+USERNAME = "your-username"      # lowercase letters, numbers, hyphens only
+TOKEN    = "your-secret-key"  # any string you choose — keep it private
 
 # ── Graph definitions ────────────────────────────────────────────
 GRAPHS = {
