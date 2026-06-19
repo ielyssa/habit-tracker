@@ -26,51 +26,58 @@ import sys
 import os
 from datetime import datetime, timedelta
 from typing import Optional
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # ══════════════════════════════════════════════════════════════════
 #  ⚙️  CONFIGURATION — edit these before first run
 # ══════════════════════════════════════════════════════════════════
 
-USERNAME = "your-username"      # lowercase letters, numbers, hyphens only
-TOKEN    = "your-secret-key"  # any string you choose — keep it private
+USERNAME = os.getenv("PIXELA_USERNAME")  # lowercase letters, numbers, hyphens only
+TOKEN = os.getenv("PIXELA_TOKEN")  # any string you choose — keep it private
+
+if not USERNAME or not TOKEN:
+    print("❌ Missing PIXELA_USERNAME or PIXELA_TOKEN in your .env file.")
+    sys.exit(1)
 
 # ── Graph definitions ────────────────────────────────────────────
 GRAPHS = {
     "1": {
-        "id":      "pushups",
-        "name":    "💪 Push-ups",
-        "label":   "Push-ups",
-        "unit":    "reps",
-        "type":    "int",
-        "color":   "shibafu",   # green
+        "id": "pushups",
+        "name": "💪 Push-ups",
+        "label": "Push-ups",
+        "unit": "reps",
+        "type": "int",
+        "color": "shibafu",  # green
         "default": 150,
-        "note":    "Total reps across both sessions",
+        "note": "Total reps across both sessions",
     },
     "2": {
-        "id":      "reading",
-        "name":    "📚 Book Reading",
-        "label":   "Reading",
-        "unit":    "pages",
-        "type":    "int",
-        "color":   "sora",      # blue
+        "id": "reading",
+        "name": "📚 Book Reading",
+        "label": "Reading",
+        "unit": "pages",
+        "type": "int",
+        "color": "sora",  # blue
         "default": 10,
-        "note":    "Pages of Atomic Habits (or any book)",
+        "note": "Pages of Atomic Habits (or any book)",
     },
     "3": {
-        "id":      "speaking",
-        "name":    "🗣️  English Speaking",
-        "label":   "Speaking",
-        "unit":    "minutes",
-        "type":    "int",
-        "color":   "ichou",     # yellow-green
+        "id": "speaking",
+        "name": "🗣️  English Speaking",
+        "label": "Speaking",
+        "unit": "minutes",
+        "type": "int",
+        "color": "ichou",  # yellow-green
         "default": 40,
-        "note":    "Minutes of fluency practice",
+        "note": "Minutes of fluency practice",
     },
 }
 
 PIXELA_BASE = "https://pixe.la/v1"
-HEADERS     = {"X-USER-TOKEN": TOKEN}
-TIMEZONE    = "Africa/Kigali"
+HEADERS = {"X-USER-TOKEN": TOKEN}
+TIMEZONE = "Africa/Kigali"
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -78,25 +85,33 @@ TIMEZONE    = "Africa/Kigali"
 # ══════════════════════════════════════════════════════════════════
 
 class C:
-    RESET  = "\033[0m"
-    BOLD   = "\033[1m"
-    DIM    = "\033[2m"
-    GREEN  = "\033[92m"
-    BLUE   = "\033[94m"
+    RESET = "\033[0m"
+    BOLD = "\033[1m"
+    DIM = "\033[2m"
+    GREEN = "\033[92m"
+    BLUE = "\033[94m"
     YELLOW = "\033[93m"
-    RED    = "\033[91m"
-    CYAN   = "\033[96m"
-    MAGENTA= "\033[95m"
-    WHITE  = "\033[97m"
+    RED = "\033[91m"
+    CYAN = "\033[96m"
+    MAGENTA = "\033[95m"
+    WHITE = "\033[97m"
 
-def bold(s):    return f"{C.BOLD}{s}{C.RESET}"
-def green(s):   return f"{C.GREEN}{s}{C.RESET}"
-def blue(s):    return f"{C.BLUE}{s}{C.RESET}"
-def yellow(s):  return f"{C.YELLOW}{s}{C.RESET}"
-def red(s):     return f"{C.RED}{s}{C.RESET}"
-def cyan(s):    return f"{C.CYAN}{s}{C.RESET}"
-def dim(s):     return f"{C.DIM}{s}{C.RESET}"
-def magenta(s): return f"{C.MAGENTA}{s}{C.RESET}"
+def bold(s):
+    return f"{C.BOLD}{s}{C.RESET}"
+def green(s):
+    return f"{C.GREEN}{s}{C.RESET}"
+def blue(s):
+    return f"{C.BLUE}{s}{C.RESET}"
+def yellow(s):
+    return f"{C.YELLOW}{s}{C.RESET}"
+def red(s):
+    return f"{C.RED}{s}{C.RESET}"
+def cyan(s):
+    return f"{C.CYAN}{s}{C.RESET}"
+def dim(s):
+    return f"{C.DIM}{s}{C.RESET}"
+def magenta(s):
+    return f"{C.MAGENTA}{s}{C.RESET}"
 
 def divider(char="─", width=58):
     print(dim(char * width))
@@ -224,10 +239,10 @@ def api_create_user() -> dict:
     return safe_json(requests.post(
         f"{PIXELA_BASE}/users",
         json={
-            "token":               TOKEN,
-            "username":            USERNAME,
+            "token": TOKEN,
+            "username": USERNAME,
             "agreeTermsOfService": "yes",
-            "notMinor":            "yes",
+            "notMinor": "yes",
         },
     ))
 
@@ -236,12 +251,12 @@ def api_create_graph(g: dict) -> dict:
         f"{PIXELA_BASE}/users/{USERNAME}/graphs",
         headers=HEADERS,
         json={
-            "id":             g["id"],
-            "name":           g["label"],
-            "unit":           g["unit"],
-            "type":           g["type"],
-            "color":          g["color"],
-            "timezone":       TIMEZONE,
+            "id": g["id"],
+            "name": g["label"],
+            "unit": g["unit"],
+            "type": g["type"],
+            "color": g["color"],
+            "timezone": TIMEZONE,
             "selfSufficient": "none",
         },
     ))
@@ -393,7 +408,7 @@ def prompt_graph() -> dict:
     opts.append("All three habits")
     choice = prompt_choice(opts, "Which habit?")
     if "All three" in choice:
-        return None   # caller handles None as "all"
+        return None  # caller handles None as "all"
     # match back to graph dict
     for g in GRAPHS.values():
         if g["name"] in choice:
@@ -695,7 +710,7 @@ def cmd_view():
             print(f"\n  {bold(g['name'])}  {dim('— stats require Supporter plan')}")
             continue
         if stats.get("isSuccess") is not False:
-            total   = stats.get("totalPixelsCount", "?")
+            total = stats.get("totalPixelsCount", "?")
             max_qty = stats.get("maxQuantity", "?")
             min_qty = stats.get("minQuantity", "?")
             print(f"\n  {bold(g['name'])}")
@@ -734,20 +749,24 @@ def cmd_history():
     section("How far back?")
     period = prompt_choice(["Last 7 days", "Last 14 days", "Last 30 days", "Last 90 days", "Custom range"], "Period")
 
-    today  = datetime.now()
-    if   "7"  in period: from_dt = today - timedelta(days=6)
-    elif "14" in period: from_dt = today - timedelta(days=13)
-    elif "30" in period: from_dt = today - timedelta(days=29)
-    elif "90" in period: from_dt = today - timedelta(days=89)
+    today = datetime.now()
+    if "7" in period:
+        from_dt = today - timedelta(days=6)
+    elif "14" in period:
+        from_dt = today - timedelta(days=13)
+    elif "30" in period:
+        from_dt = today - timedelta(days=29)
+    elif "90" in period:
+        from_dt = today - timedelta(days=89)
     else:
         section("Custom date range")
         from_str = prompt_date("From date", default="-30")
-        to_str   = prompt_date("To date",   default="today")
-        from_dt  = datetime.strptime(from_str, "%Y%m%d")
-        today    = datetime.strptime(to_str, "%Y%m%d")
+        to_str = prompt_date("To date", default="today")
+        from_dt = datetime.strptime(from_str, "%Y%m%d")
+        today = datetime.strptime(to_str, "%Y%m%d")
 
     from_str = from_dt.strftime("%Y%m%d")
-    to_str   = today.strftime("%Y%m%d")
+    to_str = today.strftime("%Y%m%d")
 
     print(f"\n  {dim('Range: ' + fmt_date(from_str) + '  →  ' + fmt_date(to_str))}\n")
 
@@ -777,14 +796,14 @@ def cmd_history():
         # Sort by date descending
         pixels.sort(key=lambda p: p["date"], reverse=True)
         total = sum(int(p["quantity"]) for p in pixels)
-        avg   = total / len(pixels)
+        avg = total / len(pixels)
 
         print(f"  {'Date':<14} {'Value':>8}  {'Bar'}")
         divider("-", 52)
         for p in pixels:
             qty = int(p["quantity"])
             bar = _mini_bar(qty, g["default"] * 2, width=15)
-            d   = fmt_date(p["date"])
+            d = fmt_date(p["date"])
             print(f"  {d:<28} {str(qty):>5} {g['unit']:<8} {dim(bar)}")
 
         divider("-", 52)
@@ -798,12 +817,12 @@ def cmd_history():
 # ══════════════════════════════════════════════════════════════════
 
 MENU_OPTIONS = [
-    ("📝  Log a session (morning / evening)",  cmd_log),
-    ("📊  View today's stats & graphs",         cmd_view),
-    ("✏️   Edit / update a past date",           cmd_edit),
-    ("📅  View recent history",                  cmd_history),
-    ("🗑️   Delete a pixel",                      cmd_delete),
-    ("🚪  Exit",                                 None),
+    ("📝  Log a session (morning / evening)", cmd_log),
+    ("📊  View today's stats & graphs", cmd_view),
+    ("✏️   Edit / update a past date", cmd_edit),
+    ("📅  View recent history", cmd_history),
+    ("🗑️   Delete a pixel", cmd_delete),
+    ("🚪  Exit", None),
 ]
 
 def main_menu():
@@ -846,21 +865,27 @@ def main():
         description="Pixela Habit Tracker — pushups, reading, english speaking",
         formatter_class=argparse.RawTextHelpFormatter,
     )
-    parser.add_argument("--setup",   action="store_true", help="Create Pixela account and graphs (run once)")
-    parser.add_argument("--log",     action="store_true", help="Log a session directly")
-    parser.add_argument("--view",    action="store_true", help="View today's stats")
-    parser.add_argument("--edit",    action="store_true", help="Edit a pixel on any date")
+    parser.add_argument("--setup", action="store_true", help="Create Pixela account and graphs (run once)")
+    parser.add_argument("--log", action="store_true", help="Log a session directly")
+    parser.add_argument("--view", action="store_true", help="View today's stats")
+    parser.add_argument("--edit", action="store_true", help="Edit a pixel on any date")
     parser.add_argument("--history", action="store_true", help="View recent pixel history")
-    parser.add_argument("--delete",  action="store_true", help="Delete a pixel")
+    parser.add_argument("--delete", action="store_true", help="Delete a pixel")
     args = parser.parse_args()
 
     try:
-        if   args.setup:   cmd_setup()
-        elif args.log:     cmd_log()
-        elif args.view:    cmd_view()
-        elif args.edit:    cmd_edit()
-        elif args.history: cmd_history()
-        elif args.delete:  cmd_delete()
+        if args.setup:
+            cmd_setup()
+        elif args.log:
+            cmd_log()
+        elif args.view:
+            cmd_view()
+        elif args.edit:
+            cmd_edit()
+        elif args.history:
+            cmd_history()
+        elif args.delete:
+            cmd_delete()
         else:
             main_menu()
 
